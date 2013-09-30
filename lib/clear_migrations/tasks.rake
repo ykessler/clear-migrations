@@ -33,7 +33,7 @@ namespace :db do
         f.puts "class Reset < ActiveRecord::Migration"
         f.puts   "\tdef self.up\n"
         f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.empty?"
-        f.puts   "\t\t\traise \"Migrations for this project have been previously cleared out with the clear_migrations gem. To create this project's database on a new system, please use db:schema:load instead of trying to run all the migrations from scratch.\""
+        f.puts   "\t\t\traise \"===> USE DB:SCHEMA:LOAD INSTEAD OF DB:MIGRATE \nMigrations for this project have been previously cleared out with the clear_migrations gem. \nTo create this project's database on a new system, please use db:schema:load instead of trying to run all the migrations from scratch.\n\n\""
         f.puts   "\t\telse"
         f.puts   "\t\t\texecute \"TRUNCATE schema_migrations;\""
         f.puts   "\t\tend"
