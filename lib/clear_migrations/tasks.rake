@@ -6,7 +6,7 @@ namespace :db do
     #check_schema
     do_migrations
     delete_migrations
-    create_migration
+    create_reset_migration
     do_migrations true
   end
   
@@ -28,7 +28,7 @@ namespace :db do
     def do_migrations( force = false )
       puts "Running #{force ? "new" : "pending"} migration#{force ? "" : "s"}..."
       puts "(IMPORTANT: Make sure others run their migrations before they checkout the changes you're about to make!)"
-      ##if force then Rake::Task[ "db:migrate" ].reenable end (WHY?)
+      if force then Rake::Task[ "db:migrate" ].reenable end
       Rake::Task[ "db:migrate" ].invoke
       puts "Done"
     end
@@ -39,12 +39,13 @@ namespace :db do
       puts "Done"
     end
         
-    def create_migration
+    def create_reset_migration
       puts "Creating migration to clear schema_migrations table (if old migrations exist) or to load schema (if no migrations have been run)..."
-      File.open( File.join( Rails.root.to_s, "db", "migrate", "#{Time.now.strftime "%Y%m%d%H%M%S"}_starting_migration.rb" ), 'w' ) do |f|
-        f.puts "class StartingMigration < ActiveRecord::Migration"
+      File.open( File.join( Rails.root.to_s, "db", "migrate", "#{Time.now.strftime "%Y%m%d%H%M%S"}_reset.rb" ), 'w' ) do |f|
+        f.puts "# Establishes reset point for migrations cleared out by the clear_migrations gem."
+        f.puts "class Reset < ActiveRecord::Migration"
         f.puts   "\tdef self.up\n"
-        f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.length == 0"
+        f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.empty?"
         f.puts   "\t\t\tRake::Task['db:schema:load'].invoke"
         f.puts   "\t\telse"
         f.puts   "\t\t\texecute \"TRUNCATE schema_migrations;\""
