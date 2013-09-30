@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "clear_migrations"
-  spec.version       = "0.0.7"
+  spec.version       = "0.0.8"
   spec.authors       = ["Yarin Kessler"]
   spec.email         = ["ykessler@appgrinders.com"]
   spec.description   = %q{Clear out old migrations from a Rails project}

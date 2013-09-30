@@ -48,11 +48,12 @@ namespace :db do
         f.puts   "\tdef self.up\n"
         f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.empty?"
         f.puts   "\t\t\tRake::Task['db:schema:load'].invoke"
-        f.puts   "\t\t\texecute \"DELETE FROM schema_migrations WHERE version=#{timestamp};\""
+        # db:schema:load fakes all pending migrations by inserting them into schema_migrations, including THIS migration. 
+        # If we don't delete the migration record now we'll get a UniqueConstraint error when it's inserted a second time upon completion.
+        f.puts   "\t\t\texecute \"DELETE FROM schema_migrations WHERE version='#{timestamp}';\""
         f.puts   "\t\telse"
         f.puts   "\t\t\texecute \"TRUNCATE schema_migrations;\""
         f.puts   "\t\tend"
-        #f.puts     "\t\texecute \"INSERT INTO schema_migrations VALUES ('#{ActiveRecord::Migrator.current_version.to_s}');\""
         f.puts   "\tend\n"
         f.puts   "\tdef self.down\n"
         f.puts     "\t\traise ActiveRecord::IrreversibleMigration"
