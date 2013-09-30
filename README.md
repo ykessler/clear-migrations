@@ -13,18 +13,26 @@ Add this line to your application's Gemfile and execute bundle to install:
 
 ## Usage
 
-(**READ AND UNDERSTAND** - The clear_migrations gem attempts to make things as easy as possible, but **clearing migrations should not be approached lightly!**)
+**NOTE:** This gem is meant to be used sparingly- especially on multi-user projects. There's not much that can go wrong when you run it in your local environment, but any collaborators and existing deployments **must have their schemas up to date** before pulling from a repo in which migrations have been cleared, otherwise pending migrations will be cleared from their project before they have a chance to run them...
 
-There's not much that can go wrong when you run it in your local environment, but any collaborators and existing deployments **must have their schemas up to date** before pulling from a repo in which migrations have been cleared, otherwise pending migrations will be cleared from their project before they have a chance to run them...
+clear_migrations gem attempts to make things as easy as possible, but **clearing migrations should always be approached carefully.**
 
-Once you're sure everyone is synced to latest schema, run the rake task provided:
+Once you're sure everyone is up to date on the latest schema, run the rake task provided:
 
     rake db:clear_migrations
 
-That's all you have to do on your own project. When the current set of changes are pulled to other repos, they will receive a single `XXX_reset.rb` migration file that will do the following:
+This will:
 
- - On a system where migrations have previously been run, It will clear the schema_migrations table, making it the first migration in line."
- - On new systems that have not yet created the DB (i.e. no records in schema_migrations), it will Raise an error prompting the user to call db:schema:load instead of trying to run all migrations from scratch."
+ - Run all pending migrations
+ - Delete all migration files from your project
+ - Create a single new migration file called `XXX_reset.rb` and migrate it
+
+The _reset migration does one of two things:
+
+ - On systems that have previously run migrations, it clears the `schema_migrations` table, automatically becoming the first entry.
+ - On new systems that don't have any `schema_migrations` records, it will raise an error if migrated, prompting the user to use `db:schema:load` instead of `db:migrate`. This is best practice anyway, and ensures that new installs always load up the full db schema without relying on the (now missing) migration trail.  
+
+When others pull the changes, they will receive a db/migrations directory that's truncated up until the reset migration, can migrate or instantiate their db as normal.
  
 
 ## Credits
