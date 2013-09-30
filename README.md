@@ -23,14 +23,9 @@ Once you're sure everyone is synced to latest schema, run the rake task provided
 
 That's all you have to do on your own project. When the current set of changes are pulled to other repos, they will receive a single `XXX_reset.rb` migration file that will do the following:
 
- - Clear the schema_migrations table on projects instances where migrations have previously been run."
- - Invoke db:schema:load on projects where migrations have not been run (i.e. no records in schema_migrations)."
+ - On a system where migrations have previously been run, It will clear the schema_migrations table, making it the first migration in line."
+ - On new systems that have not yet created the DB (i.e. no records in schema_migrations), it will Raise an error prompting the user to call db:schema:load instead of trying to run all migrations from scratch."
  
-
-## Just to be Clear...
-
- - clear\_migrations is non-destructive in so far as that it will only call `db:schema:load` if it is run, or its generated migration file is run, on a project which has an empty schema_migrations table. This will only happen if it's a new project that hasn't had `db:migrate` called on it OR if the table has been cleared out by another person/process. In the latter case, using clear\_migrations means `db:schema:load` WILL be invoked and your data WILL be destroyed. 
-
 
 ## Credits
 

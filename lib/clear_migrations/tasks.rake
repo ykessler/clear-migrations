@@ -3,7 +3,7 @@ namespace :db do
 
   desc "Clear out old db migration files"
   task :clear_migrations do
-    #check_schema
+    puts "(IMPORTANT: Make sure others run their migrations before they pull the changes you're about to make!)"
     do_migrations
     delete_migrations
     create_reset_migration
@@ -11,46 +11,29 @@ namespace :db do
   end
   
   private
-  
-    # NIU
-    def check_schema
-      schema_path = File.join "db", "schema.rb"
-      begin
-        File.open( File.join( Rails.root.to_s, schema_path ), 'r')
-      rescue
-        puts "\033[0;91mIt seems that database schema file #{schema_path} is not present.\033[0m"
-        puts "Check if you have set schema format to :ruby in your configuration file."
-        puts "If yes try to run \033[0;93mrake db:schema:dump.\033[0m"
-        exit
-      end
-    end
     
     def do_migrations( force = false )
       puts "Running #{force ? "new" : "pending"} migration#{force ? "" : "s"}..."
-      puts "(IMPORTANT: Make sure others run their migrations before they checkout the changes you're about to make!)"
       if force then Rake::Task[ "db:migrate" ].reenable end
       Rake::Task[ "db:migrate" ].invoke
       puts "Done"
     end
     
     def delete_migrations
-      puts "Deleting existing migrations..."
+      puts "Deleting migration files..."
       Dir[ File.join Rails.root.to_s, "db", "migrate", "*" ].each{ |f| File.delete f }
       puts "Done"
     end
         
     def create_reset_migration
-      puts "Creating migration to clear schema_migrations table (if old migrations exist) or to load schema (if no migrations have been run)..."
+      puts "Creating reset migration..."
       timestamp = Time.now.strftime "%Y%m%d%H%M%S"
       File.open( File.join( Rails.root.to_s, "db", "migrate", "#{timestamp}_reset.rb" ), 'w' ) do |f|
         f.puts "# Establishes reset point for migrations cleared out by the clear_migrations gem."
         f.puts "class Reset < ActiveRecord::Migration"
         f.puts   "\tdef self.up\n"
         f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.empty?"
-        f.puts   "\t\t\tRake::Task['db:schema:load'].invoke"
-        # db:schema:load fakes all pending migrations by inserting them into schema_migrations, including THIS migration. 
-        # If we don't delete the migration record now we'll get a UniqueConstraint error when it's inserted a second time upon completion.
-        f.puts   "\t\t\texecute \"DELETE FROM schema_migrations WHERE version='#{timestamp}';\""
+        f.puts   "\t\t\traise \"Migrations for this project have been previously cleared out with the clear_migrations gem. To create this project's database on a new system, please use db:schema:load instead of trying to run all the migrations from scratch.\""
         f.puts   "\t\telse"
         f.puts   "\t\t\texecute \"TRUNCATE schema_migrations;\""
         f.puts   "\t\tend"
