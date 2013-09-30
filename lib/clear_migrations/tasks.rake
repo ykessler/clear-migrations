@@ -41,12 +41,14 @@ namespace :db do
         
     def create_reset_migration
       puts "Creating migration to clear schema_migrations table (if old migrations exist) or to load schema (if no migrations have been run)..."
-      File.open( File.join( Rails.root.to_s, "db", "migrate", "#{Time.now.strftime "%Y%m%d%H%M%S"}_reset.rb" ), 'w' ) do |f|
+      timestamp = Time.now.strftime "%Y%m%d%H%M%S"
+      File.open( File.join( Rails.root.to_s, "db", "migrate", "#{timestamp}_reset.rb" ), 'w' ) do |f|
         f.puts "# Establishes reset point for migrations cleared out by the clear_migrations gem."
         f.puts "class Reset < ActiveRecord::Migration"
         f.puts   "\tdef self.up\n"
         f.puts   "\t\tif ActiveRecord::Migrator.get_all_versions.empty?"
         f.puts   "\t\t\tRake::Task['db:schema:load'].invoke"
+        f.puts   "\t\t\texecute \"DELETE FROM schema_migrations WHERE version=#{timestamp};\""
         f.puts   "\t\telse"
         f.puts   "\t\t\texecute \"TRUNCATE schema_migrations;\""
         f.puts   "\t\tend"
