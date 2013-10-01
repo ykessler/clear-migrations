@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = "0.0.11"
   spec.authors       = ["Yarin Kessler"]
   spec.email         = ["ykessler@appgrinders.com"]
-  spec.description   = %q{Clear out old migrations from a Rails project}
-  spec.summary       = %q{Clear out old migrations from a Rails project}
+  spec.description   = %q{Clear out old migrations from Rails projects}
+  spec.summary       = %q{Clear out old migrations from Rails projects}
   spec.homepage      = "https://github.com/ykessler/clear-migrations"
   spec.license       = "MIT"
 
